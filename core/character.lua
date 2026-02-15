@@ -120,6 +120,16 @@ function Character:getSpeed()
     return speed
 end
 
+function Character:hasStatus(statusName)
+    for _, status in ipairs(self.statusEffects) do
+        if status.name == statusName then
+            return true
+        end
+    end
+    return false
+end
+
+
 return Character
 
 

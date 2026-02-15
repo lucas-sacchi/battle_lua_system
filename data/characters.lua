@@ -62,11 +62,12 @@ local function createRoster()
     local nami = Character:new("Nami", 100, 16, 12, 20)
 
     nami:addMove(Move:new("Thunderbolt Tempo", 28, 85, 0.2, function(attacker, defender)
-        defender:addStatus(StatusEffects.Shock())
-        print(defender.name .. " was shocked!")
+        if not defender:hasStatus("Shock") then
+            defender:addStatus(StatusEffects.Shock())
+            print(defender.name .. " was shocked!")
+        end
     end))
-
-    nami:addMove(Move:new("Mirage Tempo", 0, 100, 0))
+    nami:addMove(Move:new("Mirage Tempo", 25, 100, 0))
     nami:addMove(Move:new("Cloud Tempo", 22, 90, 0.1))
     nami:addMove(Move:new("Storm Gust", 30, 80, 0.15))
 
@@ -99,7 +100,12 @@ local function createRoster()
     local sanji = Character:new("Sanji", 115, 21, 14, 19)
 
     sanji:addMove(Move:new("Concasse", 28, 90, 0.15))
-    sanji:addMove(Move:new("Diable Jambe", 32, 85, 0.2))
+    sanji:addMove(Move:new("Diable Jambe", 32, 85, 0.2, function(attacker, defender)
+        if not defender:hasStatus("Burn") then
+            defender:addStatus(StatusEffects.Burn())
+            print(defender.name .. " was burned!")
+        end
+    end))
     sanji:addMove(Move:new("Flambage Shot", 25, 90, 0.15))
     sanji:addMove(Move:new("Hell Memories", 38, 75, 0.25))
 
@@ -162,9 +168,13 @@ local function createRoster()
     local brook = Character:new("Brook", 100, 18, 13, 22)
 
     brook:addMove(Move:new("Soul Solid", 28, 85, 0.2))
-    brook:addMove(Move:new("Music Note", 0, 100, 0, function(attacker, defender)
-        defender:addStatus(StatusEffects.Sleep())
-        print(defender.name .. " fell asleep!")
+    brook:addMove(Move:new("Music Note", 0, 65, 0, function(attacker, defender)
+        if not defender:hasStatus("Sleep") then
+            defender:addStatus(StatusEffects.Sleep())
+            print(defender.name .. " fell asleep!")
+        else
+            print(defender.name .. " is already asleep!")
+        end
     end))
     brook:addMove(Move:new("Hip Shot", 25, 90, 0.15))
     brook:addMove(Move:new("Bink's Sake", 0, 100, 0))
@@ -178,7 +188,18 @@ local function createRoster()
     local jinbe = Character:new("Jinbe", 150, 23, 22, 12)
 
     jinbe:addMove(Move:new("Fish-Man Karate", 30, 85, 0.2))
-    jinbe:addMove(Move:new("Water Shield", 0, 100, 0))
+    jinbe:addMove(Move:new("Water Shield", 0, 100, 0, function(attacker)
+    local Buff = require("core.buff")
+        if not attacker:hasBuff("Water Shield") then
+            local buff = Buff:new("Water Shield", 3, {
+                defenseMultiplier = 1.6
+            })
+            attacker:addBuff(buff)
+            print(attacker.name .. " fortified his defense with Water Shield!")
+        else
+            print(attacker.name .. " already has Water Shield active!")
+        end
+    end))
     jinbe:addMove(Move:new("Whale Shark Wave", 35, 75, 0.25))
     jinbe:addMove(Move:new("Tidal Throw", 28, 85, 0.15))
 
