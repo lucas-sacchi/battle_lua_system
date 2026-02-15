@@ -7,8 +7,26 @@ local function waitForInput()
     io.read()
 end
 
+-- ======================
+-- PLAYER TURN
+-- ======================
+
 local function playerTurn(player, enemy)
+
+    -- Reset de bloqueio de turno
+    player.skipTurn = false
+
+    -- Status pode aplicar efeitos como Sleep ou Shock
+    player:processStatus()
+
     UI.drawBattleScreen(player, enemy)
+
+    -- Se estiver dormindo ou paralisado
+    if player.skipTurn then
+        print(player.name .. " couldn't act!")
+        waitForInput()
+        return
+    end
 
     print("Choose a move:\n")
 
@@ -33,7 +51,8 @@ local function playerTurn(player, enemy)
     local selectedMove = player.moves[choice]
 
     if selectedMove then
-        if selectedMove:didHit() then
+        if selectedMove:didHit(player, enemy) then
+
             local damage, isCrit = selectedMove:calculateDamage(player, enemy)
             enemy:takeDamage(damage)
 
@@ -43,7 +62,12 @@ local function playerTurn(player, enemy)
                 print("CRITICAL HIT!")
             end
 
-            print("It dealt " .. damage .. " damage!")
+            if damage > 0 then
+                print("It dealt " .. damage .. " damage!")
+            end
+
+            selectedMove:applyEffect(player, enemy)
+
         else
             print("\nThe attack missed!")
         end
@@ -51,19 +75,34 @@ local function playerTurn(player, enemy)
         print("\nInvalid move.")
     end
 
-    -- Aplica status no fim do turno
-    if player:isAlive() then
-        player:processStatus()
-    end
-
     waitForInput()
 end
 
+-- ======================
+-- ENEMY TURN
+-- ======================
+
 local function enemyTurn(enemy, player)
+
+    -- Reset de bloqueio de turno
+    enemy.skipTurn = false
+
+    -- Processa status antes de agir
+    enemy:processStatus()
+
+    UI.drawBattleScreen(player, enemy)
+
+    -- Se estiver dormindo ou paralisado
+    if enemy.skipTurn then
+        print(enemy.name .. " couldn't act!")
+        waitForInput()
+        return
+    end
 
     local move = enemy.moves[math.random(1, #enemy.moves)]
 
-    if move:didHit() then
+    if move:didHit(enemy, player) then
+
         local damage, isCrit = move:calculateDamage(enemy, player)
         player:takeDamage(damage)
 
@@ -73,29 +112,33 @@ local function enemyTurn(enemy, player)
             print("CRITICAL HIT!")
         end
 
-        print("It dealt " .. damage .. " damage!")
+        if damage > 0 then
+            print("It dealt " .. damage .. " damage!")
+        end
+
+        move:applyEffect(enemy, player)
+
     else
         print("\n" .. enemy.name .. "'s attack missed!")
-    end
-
-    -- Aplica status no fim do turno
-    if enemy:isAlive() then
-        enemy:processStatus()
     end
 
     waitForInput()
 end
 
+
+-- ======================
+-- BATTLE LOOP
+-- ======================
+
 function Battle.start(player, enemy)
 
-    -- Tela inicial antes de qualquer efeito
     UI.drawBattleScreen(player, enemy)
     print("Battle Start!")
     waitForInput()
 
     while player:isAlive() and enemy:isAlive() do
 
-        if player.speed >= enemy.speed then
+        if player:getSpeed() >= enemy:getSpeed() then
             playerTurn(player, enemy)
             if enemy:isAlive() then
                 enemyTurn(enemy, player)
@@ -107,6 +150,7 @@ function Battle.start(player, enemy)
             end
         end
 
+        -- Atualiza duração no fim do round
         player:updateStatusDuration()
         enemy:updateStatusDuration()
 

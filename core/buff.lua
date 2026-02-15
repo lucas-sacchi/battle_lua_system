@@ -1,11 +1,14 @@
 local Buff = {}
 Buff.__index = Buff
 
-function Buff:new(name, duration, attackMultiplier)
+function Buff:new(name, duration, modifiers)
     local self = setmetatable({}, Buff)
+
     self.name = name
     self.duration = duration
-    self.attackMultiplier = attackMultiplier or 1
+
+    self.modifiers = modifiers or {}
+
     return self
 end
 

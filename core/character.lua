@@ -15,6 +15,8 @@ function Character:new(name, hp, attack, defense, speed)
     self.statusEffects = {}
     self.buffs = {}
 
+    self.skipTurn = false
+
     return self
 end
 
@@ -73,14 +75,24 @@ function Character:getAttack()
     local attack = self.baseAttack
 
     for _, buff in ipairs(self.buffs) do
-        attack = attack * buff.attackMultiplier
+        if buff.modifiers.attackMultiplier then
+            attack = attack * buff.modifiers.attackMultiplier
+        end
     end
 
     return attack
 end
 
 function Character:getDefense()
-    return self.baseDefense
+    local defense = self.baseDefense
+
+    for _, buff in ipairs(self.buffs) do
+        if buff.modifiers.defenseMultiplier then
+            defense = defense * buff.modifiers.defenseMultiplier
+        end
+    end
+
+    return defense
 end
 
 function Character:updateBuffDuration()
@@ -96,4 +108,19 @@ function Character:updateBuffDuration()
     end
 end
 
+function Character:getSpeed()
+    local speed = self.speed
+
+    for _, buff in ipairs(self.buffs) do
+        if buff.modifiers.speedMultiplier then
+            speed = speed * buff.modifiers.speedMultiplier
+        end
+    end
+
+    return speed
+end
+
 return Character
+
+
+
