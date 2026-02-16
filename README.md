@@ -81,37 +81,6 @@ Buffs are:
 
 ---
 
-## 🗂 Project Structure
-
-OnePieceBattleSystem/
-│
-├── main.lua
-│
-├── assets/
-│ ├── background.png
-│ ├── luffy_back.png
-│ └── zoro.png
-│
-├── core/
-│ ├── character.lua
-│ ├── move.lua
-│ ├── buff.lua
-│ ├── status.lua
-│ └── status_effects.lua
-│
-├── data/
-│ └── characters.lua
-│
-├── ui/
-│ ├── battle_scene.lua
-│ └── battle_ui.lua
-│
-├── utils/
-│ └── logger.lua
-
-
----
-
 ## 🚀 How to Run
 
 1. Install LOVE2D: https://love2d.org/
