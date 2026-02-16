@@ -13,11 +13,7 @@ local function createRoster()
     local luffy = Character:new("Luffy", 120, 20, 15, 18)
 
     luffy:addMove(Move:new("Gomu Gomu no Pistol", 25, 90, 0.2))
-    luffy:addMove(Move:new("Red Hawk", 30, 85, 0.25, function(attacker, defender)
-        defender:addStatus(StatusEffects.Burn())
-        print(defender.name .. " was burned!")
-    end))
-
+    luffy:addMove(Move:new("Red Hawk", 30, 85, 0.25))
     luffy:addMove(Move:new("Gear Second", 0, 100, 0, function(attacker)
         local Buff = require("core.buff")
         local buff = Buff:new("Gear Second", 3, {
@@ -181,29 +177,6 @@ local function createRoster()
 
     table.insert(roster, brook)
 
-    -- ======================
-    -- JINBE
-    -- ======================
-
-    local jinbe = Character:new("Jinbe", 150, 23, 22, 12)
-
-    jinbe:addMove(Move:new("Fish-Man Karate", 30, 85, 0.2))
-    jinbe:addMove(Move:new("Water Shield", 0, 100, 0, function(attacker)
-    local Buff = require("core.buff")
-        if not attacker:hasBuff("Water Shield") then
-            local buff = Buff:new("Water Shield", 3, {
-                defenseMultiplier = 1.6
-            })
-            attacker:addBuff(buff)
-            print(attacker.name .. " fortified his defense with Water Shield!")
-        else
-            print(attacker.name .. " already has Water Shield active!")
-        end
-    end))
-    jinbe:addMove(Move:new("Whale Shark Wave", 35, 75, 0.25))
-    jinbe:addMove(Move:new("Tidal Throw", 28, 85, 0.15))
-
-    table.insert(roster, jinbe)
 
     return roster
 end

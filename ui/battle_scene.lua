@@ -1,6 +1,39 @@
 local BattleScene = {}
 BattleScene.__index = BattleScene
 
+-- CONFIG VISUAL POR PERSONAGEM
+local characterVisualConfig = {
+
+    robin = {
+        enemyYOffset = -20
+    },
+
+    franky = {
+        playerScaleMultiplier = 1.15
+    },
+
+    sanji = {
+        playerScaleMultiplier = 1.10
+    },
+
+    zoro = {
+        playerScaleMultiplier = 1.10
+    },
+
+    usopp = {
+        enemyScaleMultiplier = 0.90,
+        playerScaleMultiplier = 1.08
+    },
+
+    brook = {
+        playerScaleMultiplier = 1.15,
+        enemyScaleMultiplier = 1.15
+    }
+
+    -- chopper, luffy, nami = padrão
+}
+
+
 function BattleScene:new(player, enemy)
     local self = setmetatable({}, BattleScene)
 
@@ -8,8 +41,15 @@ function BattleScene:new(player, enemy)
     self.enemy = enemy
 
     self.background = love.graphics.newImage("assets/background.png")
-    self.playerSprite = love.graphics.newImage("assets/luffy_back.png")
-    self.enemySprite = love.graphics.newImage("assets/zoro_front.png")
+
+    -- sprites dinâmicos baseados no nome
+    self.playerSprite = love.graphics.newImage(
+        "assets/sprites/" .. string.lower(player.name) .. "_back.png"
+    )
+
+    self.enemySprite = love.graphics.newImage(
+        "assets/sprites/" .. string.lower(enemy.name) .. "_front.png"
+    )
 
     self.state = "player_turn"
     self.selectedMove = 1
@@ -81,22 +121,39 @@ function BattleScene:executePlayerMove()
 
     local move = self.player.moves[self.selectedMove]
 
-    if move and move:didHit(self.player, self.enemy) then
-        local damage, isCrit = move:calculateDamage(self.player, self.enemy)
-        self.enemy:takeDamage(damage)
+    if not move then
+        self.message = "Invalid move!"
+        return
+    end
 
+    -- Verifica se acertou
+    if move:didHit(self.player, self.enemy) then
+
+        local damage, isCrit = move:calculateDamage(self.player, self.enemy)
+
+        -- Aplica dano se tiver poder
+        if damage > 0 then
+            self.enemy:takeDamage(damage)
+        end
+
+        -- Aplica efeitos especiais (burn, cura, buff, etc)
+        move:applyEffect(self.player, self.enemy)
+
+        -- Mensagem base
         self.message = self.player.name .. " used " .. move.name .. "!"
 
         if isCrit then
             self.message = self.message .. " CRITICAL HIT!"
         end
+
     else
         self.message = "The attack missed!"
     end
 
+    -- Verifica morte do inimigo
     if not self.enemy:isAlive() then
         self.state = "finished"
-        self.message = self.player.name .. " wins! Press Enter to exit."
+        self.message = self.player.name .. " WINS!\nPress Enter to play again\nESC to exit"
         return
     end
 
@@ -111,19 +168,37 @@ function BattleScene:executeEnemyMove()
 
     local move = self.enemy.moves[math.random(1, #self.enemy.moves)]
 
-    if move:didHit(self.enemy, self.player) then
-        local damage, isCrit = move:calculateDamage(self.enemy, self.player)
-        self.player:takeDamage(damage)
+    if not move then
+        self.message = self.enemy.name .. " has no moves!"
+        self.state = "waiting_player"
+        return
+    end
 
+    -- Verifica se acertou
+    if move:didHit(self.enemy, self.player) then
+
+        local damage, isCrit = move:calculateDamage(self.enemy, self.player)
+
+        -- Aplica dano se tiver poder
+        if damage > 0 then
+            self.player:takeDamage(damage)
+        end
+
+        -- Aplica efeitos (burn, shock, buffs, etc)
+        move:applyEffect(self.enemy, self.player)
+
+        -- Mensagem base
         self.message = self.enemy.name .. " used " .. move.name .. "!"
 
         if isCrit then
             self.message = self.message .. " CRITICAL HIT!"
         end
+
     else
         self.message = self.enemy.name .. "'s attack missed!"
     end
 
+    -- Verifica morte do player
     if not self.player:isAlive() then
         self.state = "finished"
         self.message = self.enemy.name .. " wins! Press Enter to exit."
@@ -178,16 +253,25 @@ function BattleScene:draw()
 
     love.graphics.setFont(love.graphics.newFont(18))
 
-    ---------------------------------------------------
-    -- ENEMY (ZORO)
-    ---------------------------------------------------
-
     local enemyW = self.enemySprite:getWidth()
     local enemyH = self.enemySprite:getHeight()
-    local enemyScale = (screenH * 0.30) / enemyH
+    local baseEnemyScale = (screenH * 0.30) / enemyH
+    local configEnemy = characterVisualConfig[string.lower(self.enemy.name)]
+
+    local enemyScale = baseEnemyScale
+
+    if configEnemy and configEnemy.enemyScaleMultiplier then
+        enemyScale = enemyScale * configEnemy.enemyScaleMultiplier
+    end
+
 
     local enemyX = screenW * 0.63
     local enemyY = screenH * 0.29
+
+    if configEnemy and configEnemy.enemyYOffset then
+        enemyY = enemyY + configEnemy.enemyYOffset
+    end
+
 
     love.graphics.draw(
         self.enemySprite,
@@ -202,13 +286,16 @@ function BattleScene:draw()
     self:drawOutlinedText(self.enemy.name, enemyX + 40, enemyY - 60)
     self:drawHPBar(self.enemy, enemyX + 40, enemyY - 35)
 
-    ---------------------------------------------------
-    -- PLAYER (LUFFY)
-    ---------------------------------------------------
-
     local playerW = self.playerSprite:getWidth()
     local playerH = self.playerSprite:getHeight()
-    local playerScale = (screenH * 0.30) / playerH
+    local basePlayerScale = (screenH * 0.30) / playerH
+    local config = characterVisualConfig[string.lower(self.player.name)]
+
+    local playerScale = basePlayerScale
+
+    if config and config.playerScaleMultiplier then
+        playerScale = playerScale * config.playerScaleMultiplier
+    end
 
     local playerX = screenW * 0.15
     local playerY = screenH * 0.55
@@ -222,7 +309,7 @@ function BattleScene:draw()
         playerScale
     )
 
-    -- HP acima do Luffy
+    -- HP acima do player jogado
     self:drawOutlinedText(self.player.name, playerX + 20, playerY - 50)
     self:drawHPBar(self.player, playerX + 20, playerY - 25)
 
@@ -266,8 +353,33 @@ function BattleScene:draw()
     -- MESSAGE BOX
     ---------------------------------------------------
 
-    local msgY = screenH - 90
-    local msgHeight = 70
+    local padding = 20
+    local lineHeight = love.graphics.getFont():getHeight()
+    local textWidth = screenW - 80
+
+    -- conta quantas linhas o texto vai ocupar
+    local wrappedText, wrappedLines = love.graphics.getFont():getWrap(self.message, textWidth)
+
+    local msgHeight = (#wrappedLines * lineHeight) + padding * 2
+    local msgY = screenH - msgHeight - 20
+
+    -- Fundo
+    love.graphics.setColor(0.08, 0.08, 0.08, 0.95)
+    love.graphics.rectangle("fill", 20, msgY, screenW - 40, msgHeight, 12, 12)
+
+    -- Borda
+    love.graphics.setColor(1,1,1)
+    love.graphics.rectangle("line", 20, msgY, screenW - 40, msgHeight, 12, 12)
+
+    -- Texto
+    love.graphics.printf(
+        self.message,
+        40,
+        msgY + padding,
+        screenW - 80,
+        "left"
+    )
+
 
     love.graphics.setColor(0.08, 0.08, 0.08, 0.95)
     love.graphics.rectangle("fill", 0, msgY, screenW, msgHeight)
