@@ -1,29 +1,32 @@
-math.randomseed(os.time())
-
 local createRoster = require("data.characters")
-local Battle = require("core.battle")
+local BattleScene = require("ui.battle_scene")
 
-local roster = createRoster()
+local scene
 
-local function chooseCharacter(prompt)
-    print(prompt)
+function love.load()
 
-    for i, character in ipairs(roster) do
-        print(i .. " - " .. character.name)
-    end
+    math.randomseed(os.time())
+    math.random()
 
-    io.write("\n> ")
-    local choice = tonumber(io.read())
+    love.window.setTitle("One Piece Battle System")
+    love.window.setMode(900, 700)
 
-    if choice and roster[choice] then
-        return roster[choice]
-    else
-        print("Invalid choice.\n")
-        return chooseCharacter(prompt)
-    end
+    local roster = createRoster()
+
+    local player = roster[1]
+    local enemy = roster[2]
+
+    scene = BattleScene:new(player, enemy)
 end
 
-local player = chooseCharacter("Choose your character:\n")
-local enemy = chooseCharacter("Choose your opponent:\n")
+function love.update(dt)
+    scene:update(dt)
+end
 
-Battle.start(player, enemy)
+function love.draw()
+    scene:draw()
+end
+
+function love.keypressed(key)
+    scene:keypressed(key)
+end
