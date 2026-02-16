@@ -11,6 +11,7 @@
 This project is currently in active development.  
 New features and improvements are being added continuously.
 
+![Menu Screenshot](assets/menu_screenshot.png)
 ![Gameplay Screenshot](assets/screenshot.png)
 
 ---
