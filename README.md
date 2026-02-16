@@ -75,7 +75,6 @@ Buffs are:
 ## 🖼 Rendering System
 
 - Scaled background rendering
-- Dynamic sprite positioning
 - Health bars with color transitions
 - Outlined text rendering
 - Menu navigation with keyboard arrows
