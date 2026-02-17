@@ -72,6 +72,58 @@ Buffs are:
 
 ---
 
+## 🏗 Architecture Overview
+
+The project was designed with modularity and scalability in mind.  
+Even as a prototype, the goal was to structure the system in a way that allows future expansion into a larger RPG framework.
+
+### 📁 Folder Structure
+
+- `core/`  
+  Contains battle logic, character definitions, turn management and status/buff systems.  
+  This layer is responsible strictly for gameplay rules and mechanics.
+
+- `ui/`  
+  Handles rendering, menu drawing and input handling.  
+  Keeps visual logic separated from combat mechanics.
+
+- `data/`  
+  Defines static game data such as moves and character presets.  
+  Allows easy expansion of the roster without modifying the battle engine.
+
+- `utils/`  
+  Shared helper functions used across modules.
+
+- `assets/`  
+  Stores sprites and visual resources.
+
+---
+
+### 🔄 State-Driven Battle Flow
+
+The battle system operates using a state-based structure:
+
+- `player_turn`
+- `enemy_turn`
+- `animation`
+- `finished`
+
+Each state controls its own update and input logic, reducing coupling and improving maintainability.
+
+---
+
+### 🧠 Design Decisions
+
+- Implemented Object-Oriented Programming using Lua metatables.
+- Separated gameplay logic from rendering logic for cleaner architecture.
+- Designed status effects as independent modules for extensibility.
+- Built the damage calculation system to support stacking buffs and modifiers.
+- Structured the engine to support future features like experience, leveling, AI improvements and additional characters.
+
+This architectural approach reflects real-world game development practices applied to a small-scale prototype.
+
+---
+
 ## 🖼 Rendering System
 
 - Scaled background rendering
