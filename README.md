@@ -129,7 +129,6 @@ This architectural approach reflects real-world game development practices appli
 - Scaled background rendering
 - Health bars with color transitions
 - Outlined text rendering
-- Menu navigation with keyboard arrows
 
 ---
 
@@ -145,8 +144,7 @@ This architectural approach reflects real-world game development practices appli
 
 ## 🎯 Current Features
 
-- Playable battle between Luffy and Zoro
-- Menu navigation via arrow keys
+- Playable battle between random Mugiwara characters
 - Turn state system
 - Randomized combat engine
 - Visual interface with background and sprites
